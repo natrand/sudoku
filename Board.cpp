@@ -1,6 +1,8 @@
 #include "Board.h"
 #include <cstdlib>
 #include <iostream>
+#include <random>
+
 
 Board::Board()
 {
@@ -72,12 +74,16 @@ void Board::draw(sf::RenderWindow& window)
 
 void Board::GenerateRandomNumbers() {
 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
     SudokuBoard.clear();
 
     for (int i = 0; i < 9; i++) {
         std::vector<int> row;
         for (int j = 0; j < 9; j++) {
-            int num = rand() % 9 + 1;
+            std::uniform_int_distribution<int> dis(1, 9);
+            int num = dis(gen);
             row.push_back(num);
         }
         SudokuBoard.push_back(row);

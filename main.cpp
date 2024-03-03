@@ -12,6 +12,7 @@ int main()
     Board sudokuboard;
     Game game;
     game.getBoard().GenerateRandomNumbers();
+    game.startTimer();
 
     while (window.isOpen())
     {
@@ -24,7 +25,9 @@ int main()
         
         window.clear(sf::Color(65, 36, 40));
         sudokuboard.draw(window);
+        game.draw(window);
         game.update(window);
+
         window.display();
     }
 
