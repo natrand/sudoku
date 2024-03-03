@@ -1,4 +1,6 @@
 #include "Board.h"
+#include <cstdlib>
+#include <iostream>
 
 Board::Board()
 {
@@ -7,6 +9,12 @@ Board::Board()
     smallRectSize = sf::Vector2f(60, 60);
     smallGap = 5.0f;
     gap = 50.0f;
+
+    if (!font.loadFromFile("assets/joystix monospace.otf"))
+    {
+        std::cout << "Error: Font loading failed." << std::endl;
+    }
+
 
     // Calculate total width of the grid
     float totalWidth = 3 * (bigRectSize.x + gap) - gap;
@@ -60,4 +68,39 @@ void Board::draw(sf::RenderWindow& window)
             window.draw(smallRectangles[i][j]);
         }
     }
+}
+
+void Board::GenerateRandomNumbers() {
+
+    SudokuBoard.clear();
+
+    for (int i = 0; i < 9; i++) {
+        std::vector<int> row;
+        for (int j = 0; j < 9; j++) {
+            int num = rand() % 9 + 1;
+            row.push_back(num);
+        }
+        SudokuBoard.push_back(row);
+    }
+}
+
+void Board::updateNumbers(const std::vector<std::vector<int>>& SudokuBoard, sf::RenderWindow& window) {
+    for (int i = 0; i < 9; ++i) {
+        for (int j = 0; j < 9; ++j) {
+            int value = SudokuBoard[i][j];
+            sf::RectangleShape& smallRect = smallRectangles[i][j];
+
+            float offsetX = (smallRectSize.x - textSize) / 2;
+            float offsetY = (smallRectSize.y - textSize) / 2;
+
+            // Create SFML text object to display the number
+            sf::Text text(std::to_string(value), font, textSize);
+            text.setPosition(smallRect.getPosition().x + offsetX, smallRect.getPosition().y + offsetY);
+            text.setFillColor(sf::Color::Black); // Set text color (you can change it as needed)
+
+            // Draw the text on the window
+            window.draw(text);
+        }
+    }
+
 }

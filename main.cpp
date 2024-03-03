@@ -1,6 +1,7 @@
 ﻿#include <SFML/Graphics.hpp>
 #include "Board.h"
 #include "Menu.h"
+#include "Game.h"
 
 int main()
 {
@@ -9,6 +10,8 @@ int main()
     window.clear(sf::Color(65,36,40));
 
     Board sudokuboard;
+    Game game;
+    game.getBoard().GenerateRandomNumbers();
 
     while (window.isOpen())
     {
@@ -18,9 +21,10 @@ int main()
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-
+        
         window.clear(sf::Color(65, 36, 40));
         sudokuboard.draw(window);
+        game.update(window);
         window.display();
     }
 

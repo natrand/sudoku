@@ -1,0 +1,6 @@
+*.dll
+\x64
+sudoku.vcxproj
+sudoku.vcxproj.filters
+sudoku.vcxproj.user
+sudoku.sln
