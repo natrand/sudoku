@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <random>
+#include <vector>
 
 
 Board::Board()
@@ -78,15 +79,11 @@ void Board::GenerateRandomNumbers() {
     std::mt19937 gen(rd());
 
     SudokuBoard.clear();
+    SudokuBoard.resize(9, std::vector<int>(9, 0)); // Initialize Sudoku board with zeros
 
-    for (int i = 0; i < 9; i++) {
-        std::vector<int> row;
-        for (int j = 0; j < 9; j++) {
-            std::uniform_int_distribution<int> dis(1, 9);
-            int num = dis(gen);
-            row.push_back(num);
-        }
-        SudokuBoard.push_back(row);
+    // Call the backtracking function to generate a valid Sudoku board
+    if (!generateSudokuBoard(0, 0)) {
+        std::cerr << "Error: Failed to generate Sudoku board." << std::endl;
     }
 }
 
@@ -109,4 +106,100 @@ void Board::updateNumbers(const std::vector<std::vector<int>>& SudokuBoard, sf::
         }
     }
 
+}
+
+bool Board::isSafe() const {
+    // Check each row, column, and 3x3 board
+    for (int i = 0; i < 9; ++i) {
+        std::vector<bool> rowVisited(9);
+        std::vector<bool> colVisited(9);
+        std::vector<bool> boardVisited(9);
+
+        for (int j = 0; j < 9; ++j) {
+            // Check row
+            int rowNum = SudokuBoard[i][j];
+            if (rowNum < 1 || rowNum > 9) {
+                continue; // Skip invalid numbers
+            }
+            if (rowVisited[rowNum - 1]) {
+                return false; // Duplicate number found in row
+            }
+            rowVisited[rowNum - 1] = true;
+
+            // Check column
+            int colNum = SudokuBoard[j][i];
+            if (colNum < 1 || colNum > 9) {
+                continue; // Skip invalid numbers
+            }
+            if (colVisited[colNum - 1]) {
+                return false; // Duplicate number found in column
+            }
+            colVisited[colNum - 1] = true;
+
+            // Check 3x3 board
+            int startRow = 3 * (i / 3);
+            int startCol = 3 * (i % 3);
+            int boardNum = SudokuBoard[startRow + j / 3][startCol + j % 3];
+            if (boardNum < 1 || boardNum > 9) {
+                continue; // Skip invalid numbers
+            }
+            if (boardVisited[boardNum - 1]) {
+                return false; // Duplicate number found in 3x3 board
+            }
+            boardVisited[boardNum - 1] = true;
+        }
+    }
+
+    return true; // Board is safe
+}
+
+
+bool Board::generateSudokuBoard(int row, int col) {
+    if (row == 9) {
+        return true; // All rows filled, Sudoku board generated successfully
+    }
+
+    // Calculate next row and column indices
+    int nextRow = (col == 8) ? row + 1 : row;
+    int nextCol = (col + 1) % 9;
+
+    // Try placing numbers 1 to 9 in the current cell
+    for (int num = 1; num <= 9; ++num) {
+        // Check if the current number is valid in the current cell
+        if (isValidMove(row, col, num)) {
+            SudokuBoard[row][col] = num;
+
+            // Recursively try filling the next cell
+            if (generateSudokuBoard(nextRow, nextCol)) {
+                return true; // Sudoku board generated successfully
+            }
+
+            // Backtrack if the current configuration doesn't lead to a valid solution
+            SudokuBoard[row][col] = 0;
+        }
+    }
+
+    return false; // No valid number found for the current cell
+}
+
+bool Board::isValidMove(int row, int col, int num) const {
+    // Check if the number is already present in the current row or column
+    for (int i = 0; i < 9; ++i) {
+        if (SudokuBoard[row][i] == num || SudokuBoard[i][col] == num) {
+            return false; // Number already present in row or column
+        }
+    }
+
+    // Check if the number is already present in the current 3x3 subgrid
+    int startRow = 3 * (row / 3);
+    int startCol = 3 * (col / 3);
+    for (int i = startRow; i < startRow + 3; ++i) {
+        for (int j = startCol; j < startCol + 3; ++j) {
+            if (SudokuBoard[i][j] == num) {
+                return false; // Number already present in 3x3 subgrid
+            }
+        }
+    }
+
+    return true; // Move is valid
 }
